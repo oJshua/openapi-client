@@ -130,6 +130,11 @@ export function renderParamSignature(op: ApiOperation, options: ClientOptions, p
   const optParam = renderOptionalParamsSignature(op, optional, options, pkg)
   if (optParam.length) funcParams.push(optParam)
 
+  funcParams.push([
+    'extraData?',
+    'any'
+  ]);
+
   return funcParams.map(p => p.join(': ')).join(', ')
 }
 

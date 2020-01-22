@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import * as program from 'commander'
-import chalk from 'chalk'
+import * as chalk from 'chalk'
 import { genCode } from './index'
 
 const args: any = program

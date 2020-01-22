@@ -14,9 +14,9 @@ export function init(serviceOptions: api.ServiceOptions) {
 	options = serviceOptions;;
 }
 
-export function request(op: api.OperationInfo, parameters?: api.OperationParamGroups, attempt = 1): Promise<any> {
+export function request(op: api.OperationInfo, parameters?: api.OperationParamGroups, extraData = undefined, attempt = 1): Promise<any> {
 	if (!attempt) attempt = 1;
-	return acquireRights(op, spec, options)
+	return acquireRights(op, spec, options, extraData)
 		.then(rights => {
 			parameters = parameters || {};;
 			const baseUrl = getBaseUrl(spec);;
@@ -27,16 +27,16 @@ export function request(op: api.OperationInfo, parameters?: api.OperationParamGr
 			const req = buildRequest(op, reqInfo.baseUrl, reqInfo.parameters, rights);;
 			return makeFetchRequest(req)
 				.then(res => processResponse(req, <any>res, attempt, options), e => processError(req, e))
-				.then(outcome => outcome.retry ? request(op, parameters, attempt + 1) : outcome.res);;
+				.then(outcome => outcome.retry ? request(op, parameters, extraData, attempt + 1) : outcome.res);;
 		});;
 }
 
-function acquireRights(op: api.OperationInfo, spec: api.OpenApiSpec, options: api.ServiceOptions): Promise<api.OperationRights> {
+function acquireRights(op: api.OperationInfo, spec: api.OpenApiSpec, options: api.ServiceOptions, extraData: any): Promise<api.OperationRights> {
 	if (op.security && options.getAuthorization) {
 		return op.security.reduce<Promise<api.OperationRights>>((promise, security) => {
 			return promise.then(rights => {
 				const securityDefinition = spec.securityDefinitions[security.id];;
-				return options.getAuthorization(security, securityDefinition, op)
+				return options.getAuthorization(security, securityDefinition, op, extraData)
 							.then(auth => {
 								rights[security.id] = auth;;
 								return rights;;
